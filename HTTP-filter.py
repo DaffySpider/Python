@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-
 import os
 from scapy.all import *
 from scapy.layers import http
